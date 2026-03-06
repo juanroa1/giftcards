@@ -1,0 +1,19 @@
+{
+  "name": "rbm-daily-downloader",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node src/run-local.js"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^133.0.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "dotenv": "^16.4.7",
+    "playwright-core": "^1.52.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
