@@ -28,10 +28,43 @@ async function loginAndGoToSalidas(page, config) {
   }
 
   if (config.salidasParentSelector) {
-    await page.locator(config.salidasParentSelector).click({ timeout: config.timeoutMs });
+    await page.locator(config.salidasParentSelector).first().click({ timeout: config.timeoutMs });
   }
 
-  await page.locator(config.salidasSelector).click({ timeout: config.timeoutMs });
+  const salidasSelectors = [
+    config.salidasSelector,
+    'a.TreeNode:has-text("Salidas")',
+    'a.FolderTreeItem:has-text("Salidas")',
+    'text=Salidas'
+  ].filter(Boolean);
+
+  let lastError;
+  for (const selector of salidasSelectors) {
+    try {
+      await page.locator(selector).first().click({ timeout: Math.min(config.timeoutMs, 15000) });
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const stillOnLogin =
+    (await page.locator(config.usernameSelector).count()) > 0 &&
+    (await page.locator(config.passwordSelector).count()) > 0;
+  const currentUrl = page.url();
+  const bodyText = (await page.locator('body').innerText().catch(() => ''))
+    .replace(/\s+/g, ' ')
+    .slice(0, 300);
+
+  throw new Error(
+    [
+      'No se pudo abrir la carpeta Salidas.',
+      `URL actual: ${currentUrl}`,
+      `Sigue en login: ${stillOnLogin ? 'si' : 'no'}`,
+      `Texto visible: ${bodyText || '(vacio)'}`,
+      `Ultimo error: ${lastError instanceof Error ? lastError.message : String(lastError)}`
+    ].join(' | ')
+  );
 }
 
 function normalizePrefix(basePath) {
